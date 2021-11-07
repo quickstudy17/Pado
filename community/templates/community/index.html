@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<ul class="d-flex flex-column align-items-center list-unstyled">
+  {% for article in articles %}
+  <li class="my-3">
+    <div class="card" style="width: 30rem;">
+      <a class="text-decoration-none m-2 text-dark fw-bold" href="{% url 'accounts:profile' article.user.username %}">{{ article.user.username }}</a>
+      {% if article.image %}
+        <img src="{{ article.image.url }}" class="card-img-top" alt="이미지">
+      {% endif %}
+      <div class="card-body pb-0">
+        <div class="d-flex flex-row">
+          <form action="{% url 'community:article_like' article.pk %}" method="POST">
+            {% csrf_token %}
+            <button class="btn btn-link text-dark p-0 mx-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+              </svg>
+            </button>
+          </form>
+          <form action="{% url 'community:detail' article.pk %}">
+            <button class="btn btn-link text-dark p-0 mx-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-chat-right" viewBox="0 0 16 16">
+                <path d="M2 1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h9.586a2 2 0 0 1 1.414.586l2 2V2a1 1 0 0 0-1-1H2zm12-1a2 2 0 0 1 2 2v12.793a.5.5 0 0 1-.854.353l-2.853-2.853a1 1 0 0 0-.707-.293H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12z"/>
+              </svg>
+            </button>
+          </form>
+        </div>
+        <div class="fw-bold my-2">
+          좋아요 {{ article.like_users.count }}개
+        </div>
+        <div>
+          <a class="text-decoration-none m-0 text-dark fw-bold" href="{% url 'accounts:profile' article.user.username %}">
+            {{ article.user }}
+          </a> {{ article.content }}
+        </div>
+
+        <ul class="list-unstyled">
+          {% for comment in article.comment_set.all %}
+            <li>
+              <a class="text-decoration-none m-0 text-dark fw-bold" href="{% url 'accounts:profile' comment.user.username %}">
+                {{ comment.user }}
+              </a> {{ comment.content }}
+              
+              {% if request.user == comment.user %}
+              <form style="display: inline-block;" action="{% url 'community:comment_delete' article.pk comment.pk %}" method="POST">
+                {% csrf_token %}
+                <button class="btn btn-link text-danger text-decoration-none p-0 pb-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
+                    <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                  </svg>
+                </button>
+              </form>
+              {% endif %}
+
+            </li>
+          {% empty %}
+            <li>No comments... YET</li>
+          {% endfor %}
+        </ul>
+
+        
+      </div>
+      <hr>
+      <form class="d-flex flex-row justify-content-between mb-3 mx-2"action="{% url 'community:comment_create' article.pk %}" method="POST">
+        {% csrf_token %}
+        <div class='h-50'>
+          {{ form.content }}
+        </div> 
+        <div>
+          <button class="btn btn-link text-primary text-decoration-none">
+            게시
+          </button>
+        </div>
+      </form>
+    </div>
+  </li>
+
+  {% empty %}
+  <div>
+    게시글이 읎으유..
+  </div>
+  {% endfor %}
+</ul>
+
+
+{% endblock content %}

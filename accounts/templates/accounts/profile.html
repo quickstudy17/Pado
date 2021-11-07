@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ profile.username }}</h1>
+{% if profile.image %}
+  <img src="{{ profile.image.url }}" alt="프사">
+{% endif %}
+<h2>Followers: {{ profile.followers.count }}</h2>
+<h2>Followings: {{ profile.followings.count }}</h2>
+
+{% if request.user.is_authenticated and request.user != profile %}
+<form action="{% url 'accounts:follow' profile.username %}" method="POST">
+  {% csrf_token %}
+  {% if is_following %}
+    <button>UNFOLLOW</button>
+  {% else %}
+    <button>FOLLOW</button>
+  {% endif %}
+</form>
+{% endif %}
+
+{% for article in articles %}
+  {% if article.image %}
+    <a href="{% url 'community:detail' article.pk %}">
+      <img src="{{ article.image.url }}" alt="이미지" width="400px" height="300px">
+    </a>
+  {% endif %}
+{% endfor %}
+
+{% endblock content %}

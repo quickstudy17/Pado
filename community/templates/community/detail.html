@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  {{ article.user.username }}
+  {% if article.image %}
+    <img src="{{ article.image.url }}" alt="이미지">
+  {% endif %}
+  {{ article.content }}
+  
+  <form action="{% url 'community:article_delete' article.pk %}" method="POST">
+    {% csrf_token %}
+    <button>삭제</button>
+  </form>
+
+  <form action="{% url 'community:article_like' article.pk %}" method="POST">
+    {% csrf_token %}
+    <button>:)</button> ({{ article.like_users.count }})
+  </form>
+
+  <ul>
+  {% for comment in article.comment_set.all %}
+    <li>
+      <a href="{% url 'accounts:profile' comment.user.username %}">
+        {{ comment.user }}
+      </a>: {{ comment.content }}
+      
+      {% if request.user == comment.user %}
+      <form style="display: inline-block;" action="{% url 'community:comment_delete' article.pk comment.pk %}" method="POST">
+        {% csrf_token %}
+        <button>[X]</button>
+      </form>
+      {% endif %}
+
+    </li>
+  {% empty %}
+    <li>No comments... YET</li>
+  {% endfor %}
+  </ul>
+
+  <form action="{% url 'community:comment_create' article.pk %}" method="POST">
+    {% csrf_token %}  
+    {{ form }}
+    <button>게시</button>
+  </form>
+
+
+{% endblock content %}

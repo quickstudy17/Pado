@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if not users and not articles %}
+  <h1>검색 결과가 없습니다</h1>
+{% elif users %}
+  {% for user in users %}
+  <div class="container"> 
+    <div class="card">
+      <div class="card-body">
+        <a href="{% url 'accounts:profile' user.username %}">
+          <h1>{{ user.username }}</h1>
+        </a>
+      </div>
+    </div>
+  </div>
+  <br>
+  {% endfor %}
+{% elif articles %}
+  {% for article in articles %}
+    <div class="container"> 
+      <div class="card">
+        <div class="card-body">
+          <a href="{% url 'community:detail' article.pk %}">
+            <h1>{{ article.content }}</h1>
+          </a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}
+
+{% endblock content %}
