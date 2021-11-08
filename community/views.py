@@ -1,3 +1,6 @@
+import random
+import os.path
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_safe, require_POST, require_http_methods
 from django.contrib.auth.decorators import login_required
@@ -5,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 from .models import Article, Comment
 from accounts.models import User
 from .forms import ArticleForm, CommentForm
+
+from PIL import Image
 
 # Create your views here.
 def index(request):
@@ -118,3 +123,23 @@ def search(request):
         return render(request, 'community/search.html', context)
     else:
         return render(request, 'community/search.html')
+
+
+@require_POST
+def zoom_img(request, article_pk):
+    article = get_object_or_404(Article, pk=article_pk)
+    image = Image.open(article.image)
+    zoom = random.uniform(0.7, 1.3)
+    width, height = image.size
+    x = width / 2
+    y = height / 2
+    crop_image = image.crop((x - (width / 2 / zoom), y - (height / 2 / zoom), x + (width / 2 / zoom), y + (height / 2 / zoom)))
+    zoom_image = crop_image.resize((width, height), Image.LANCZOS)
+    save_path = './static/'
+    zoom_image.save(os.path.join(save_path, 'zoom_image.png'))   
+
+    context = {
+        'zoom_image':zoom_image,
+        'article':article,
+    }
+    return render(request, 'community/zoom.html', context)    
