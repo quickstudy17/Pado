@@ -33,7 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'accounts',
     'community',
-
+    'mathfilters', # 선우_댓글 더보기
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

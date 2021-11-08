@@ -1,30 +1,43 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{{ profile.username }}</h1>
-{% if profile.image %}
-  <img src="{{ profile.image.url }}" alt="프사">
-{% endif %}
-<h2>Followers: {{ profile.followers.count }}</h2>
-<h2>Followings: {{ profile.followings.count }}</h2>
+<!--프로필 페이지 전체 레이아웃-->
+<div class="d-flex flex-column align-items-center">
+  <div class="feed_name" style="justify-content: space-between">
+    <!--선우 프로필 이미지 조정-->
+    <div class="big_profile_box">
+    {% if profile.image %}
+      <img class="profile_page_img" src="{{ profile.image.url }}" alt="프사">
+    {% endif %}
+    </div>
+    <span class="feed_name_txt">{{ profile.username }} </span>
+  </div>
+  <!---->
 
-{% if request.user.is_authenticated and request.user != profile %}
-<form action="{% url 'accounts:follow' profile.username %}" method="POST">
-  {% csrf_token %}
-  {% if is_following %}
-    <button>UNFOLLOW</button>
-  {% else %}
-    <button>FOLLOW</button>
-  {% endif %}
-</form>
-{% endif %}
 
-{% for article in articles %}
-  {% if article.image %}
-    <a href="{% url 'community:detail' article.pk %}">
-      <img src="{{ article.image.url }}" alt="이미지" width="400px" height="300px">
-    </a>
+
+  <h2>Followers: {{ profile.followers.count }}</h2>
+  <h2>Followings: {{ profile.followings.count }}</h2>
+
+  {% if request.user.is_authenticated and request.user != profile %}
+  <form action="{% url 'accounts:follow' profile.username %}" method="POST">
+    {% csrf_token %}
+    {% if is_following %}
+      <button>UNFOLLOW</button>
+    {% else %}
+      <button>FOLLOW</button>
+    {% endif %}
+  </form>
   {% endif %}
-{% endfor %}
+
+  {% for article in articles %}
+    {% if article.image %}
+      <a href="{% url 'community:detail' article.pk %}">
+        <img src="{{ article.image.url }}" alt="이미지" width="400px" height="300px">
+      </a>
+    {% endif %}
+  {% endfor %}
+  
+</div>
 
 {% endblock content %}
