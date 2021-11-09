@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('community/', include('community.urls')),
+    path('accounts/', include('allauth.urls')), # 선우_allauth _accounts/ 중복 괜찮아요!
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
