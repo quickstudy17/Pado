@@ -19,23 +19,28 @@
       {% if article.image %}
         <img src="{{ article.image.url }}" class="card-img-top" alt="이미지">
       {% endif %}
+
+    <!--선우 좋아요 ajax -->
       <div class="card-body pb-0">
         <div class="d-flex flex-row">
-          <form action="{% url 'community:article_like' article.pk %}" method="POST">
+          <form data-article-id="{{ article.pk }}" class="like-form" method="POST">
             {% csrf_token %}
-    <!--선우 채워진 하트 -->
               {% if request.user in article.like_users.all %}
-                <button class="btn btn-link link-danger p-0 mx-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
-                  </svg>
-                </button>
+                <div id="likeBtn-{{ article.pk }}" value="좋아요 취소">
+                  <button class="btn btn-link link-danger p-0 mx-2" >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                    </svg>
+                  </button>
+                </div>
               {% else %}
-                <button style="display: inline-block;" class="btn btn-link link-danger p-0 mx-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
-                    <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
-                  </svg>
-                </button>
+                <div id="likeBtn-{{ article.pk }}" value="좋아요">
+                  <button style="display: inline-block;" class="btn btn-link link-danger p-0 mx-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                      <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                    </svg>
+                  </button>
+                </div>
               {% endif %}
           </form>
     <!---->
@@ -61,8 +66,11 @@
         </div>
 
         <div class="fw-bold my-2">
-          좋아요 {{ article.like_users.count }}개
+          <span id="likeCnt-{{ article.pk }}">
+            좋아요 {{ article.like_users.count }}개
+          </span>
         </div>
+
         <div>
           <a class="text-decoration-none m-0 text-dark fw-bold" href="{% url 'accounts:profile' article.user.username %}">
             {{ article.user }}
@@ -95,7 +103,6 @@
                 </form>
                 {% endif %}
               </li>
-
             {% endif %}
           {% endfor %}
         </ul>
@@ -159,3 +166,39 @@
   </div>
 </footer>
 {% endblock content %}
+
+{% block script %}
+<script>
+  const likeFormList = document.querySelectorAll('.like-form')
+  likeFormList.forEach((likeForm)=> {
+    likeForm.addEventListener('submit', (e)=> {
+      e.preventDefault()
+      // console.log('확인!!!!!!')
+      // console.log(e.target.dataset)
+
+      const articleId = e.target.dataset.articleId
+      const requestUrl = `/community/${articleId}/like/`
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value
+
+      axios.post(requestUrl, {}, {headers: {'X-CSRFToken': csrfToken}})
+        .then((res) => {
+          const likeCount = res.data.like_count
+          const liked = res.data.liked
+          console.log('liked')
+
+          const likeBtn = document.querySelector(`#likeBtn-${articleId}`)
+          likeBtn.value = liked ? '좋아요 취소' : '좋아요'
+
+          const likeCnt = document.querySelector(`#likeCnt-${articleId}`)
+          likeCnt.innerText = `좋아요 ${likeCount}개`
+
+        })
+        .catch((err)=> {
+          window.alert(err)
+        })
+
+    })
+  })
+
+</script>
+{% endblock script %}

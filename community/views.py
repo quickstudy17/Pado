@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_safe, require_POST, require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 
 from .models import Article, Comment
 from accounts.models import User
@@ -61,6 +62,26 @@ def detail(request, article_pk):
     }
     return render(request, 'community/detail.html', context)
 
+@login_required
+@require_http_methods(['GET', 'POST'])
+def update(request, article_pk):
+    article = get_object_or_404(Article, pk=article_pk)
+    if request.user == article.user:
+        if request.method == 'POST':
+            form = ArticleForm(request.POST, instance=article)
+            if form.is_valid():
+                form.save()
+                return redirect('community:detail', article.pk)
+        else:
+            form = ArticleForm(instance=article)
+    else:
+        return redirect('articles:index')
+    context = {
+        'article': article,
+        'form': form,
+    }
+    return render(request, 'community/update.html', context)
+
 
 @require_POST
 def article_delete(request, article_pk):
@@ -73,12 +94,26 @@ def article_delete(request, article_pk):
 
 
 def article_like(request, article_pk):
-    article = get_object_or_404(Article, pk=article_pk)
-    if article.like_users.filter(pk=request.user.pk).exists():
-        article.like_users.remove(request.user)
-    else:
-        article.like_users.add(request.user)
-    return redirect(request.META.get('HTTP_REFERER'))
+    if request.user.is_authenticated:
+        article = get_object_or_404(Article, pk=article_pk)
+
+        # 현재 좋아요를 요청하는 회원(request.user)이
+        # 해당 게시글의 좋아요를 누른 회원 목록에 이미 있다면,
+        if article.like_users.filter(pk=request.user.pk).exists():
+            # 좋아요 취소
+            article.like_users.remove(request.user)
+            liked = False
+        else:
+            # 좋아요 하기
+            article.like_users.add(request.user)
+            liked = True
+
+        like_count = article.like_users.count()
+        context = {
+            'liked' : liked,
+            'like_count' : like_count,
+        }
+        return JsonResponse(context)
 
 
 def comment_create(request, article_pk):

@@ -6,12 +6,16 @@
     <img src="{{ article.image.url }}" alt="이미지">
   {% endif %}
   {{ article.content }}
+  <br>
   
+  {% if user == article.user %}
+  <a href="{% url 'community:update' article.pk %}">[UPDATE]</a>
   <form action="{% url 'community:article_delete' article.pk %}" method="POST">
     {% csrf_token %}
     <button>삭제</button>
   </form>
-
+  {% endif %}
+  
   <form action="{% url 'community:article_like' article.pk %}" method="POST">
     {% csrf_token %}
     <button>:)</button> ({{ article.like_users.count }})

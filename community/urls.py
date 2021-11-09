@@ -13,6 +13,9 @@ urlpatterns = [
     path('create/upload/', views.create_upload, name='create_upload'),
     # 게시판 R
     path('<int:article_pk>/', views.detail, name='detail'),
+    # 게시판 U
+    path('<int:article_pk>/update/', views.update, name='update'),
+
     # 게시판 D
     path('<int:article_pk>/delete/', views.article_delete, name='article_delete'),
     # 게시판 좋아요
