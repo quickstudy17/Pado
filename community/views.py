@@ -4,6 +4,7 @@ import os.path
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_safe, require_POST, require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 from .models import Article, Comment
 from accounts.models import User
@@ -14,9 +15,12 @@ from PIL import Image
 # Create your views here.
 def index(request):
     articles = Article.objects.order_by('-pk')
+    page = request.GET.get('page', '1')
+    paginator = Paginator(articles, '10')
+    page_obj = paginator.get_page(page)
     form = CommentForm()
     context = {
-        'articles': articles,
+        'articles': page_obj,
         'form': form,
     }
     return render(request, 'community/index.html', context)
