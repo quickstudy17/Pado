@@ -8,17 +8,27 @@
     <div class="big_profile_box">
     {% if profile.image %}
       <img class="profile_page_img" src="{{ profile.image.url }}" alt="프사">
+    {% comment %} {% else %}
+      <img src="auser.png" alt="#"> {% endcomment %}
     {% endif %}
     </div>
     <span class="feed_name_txt">{{ profile.username }} </span>
   </div>
+  {% comment %} 프사가 있는 경우에만 버튼이 보여야할거같은데 디폴트값들어가면 해결될듯? {% endcomment %}
+  {% comment %} <form action="{% url 'accounts:updateimg' %}" method="POST">
+    {% csrf_token %}
+    <button>
+      프로필 사진 수정
+    </button>
+  </form> {% endcomment %}
   <!---->
 
-
-
-  <h2>Followers: {{ profile.followers.count }}</h2>
-  <h2>Followings: {{ profile.followings.count }}</h2>
-
+      
+  <br>
+  <h5>Followers: {{ profile.followers.count }}</h5>
+  <h5>Followings: {{ profile.followings.count }}</h5>
+  <hr>
+  <h5>게시글</h5>
   {% if request.user.is_authenticated and request.user != profile %}
   <form action="{% url 'accounts:follow' profile.username %}" method="POST">
     {% csrf_token %}
@@ -33,7 +43,7 @@
   {% for article in articles %}
     {% if article.image %}
       <a href="{% url 'community:detail' article.pk %}">
-        <img src="{{ article.image.url }}" alt="이미지" width="400px" height="300px">
+        <img src="{{ article.image.url }}" style="padding: 10px;"alt="이미지" width="400px" height="300px">
       </a>
     {% endif %}
   {% endfor %}

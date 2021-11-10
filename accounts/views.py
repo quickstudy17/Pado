@@ -14,7 +14,7 @@ def signup(request):
             form = CustomUserCreationForm(request.POST, request.FILES)
             if form.is_valid():
                 user = form.save()
-                auth_login(request, user)
+                auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 return redirect('community:index')
         else:
             form = CustomUserCreationForm()
@@ -33,7 +33,7 @@ def login(request):
             form = AuthenticationForm(request, request.POST)
             if form.is_valid():
                 user = form.get_user()
-                auth_login(request, user)
+                auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 return redirect(request.GET.get('next') or 'community:index')
         else:
             form = AuthenticationForm()
@@ -72,3 +72,23 @@ def follow(request, username):
     else:
         following.followers.add(follower)
     return redirect('accounts:profile', follower.username)
+
+
+# def updateimg(request):
+#     if not request.user.is_authenticated:
+#         if request.method == 'POST':
+#             form = CustomUserChangeForm(request.POST, request.FILES, instance=request.user)
+#             if form.is_valid():
+#                 user = form.get_user()
+#                 auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+#                 return redirect(request.GET.get('next') or 'accounts:updateimg')
+#         else:
+#             form = CustomUserChangeForm(instance=request.user)
+        
+#         context = {
+#             'form': form,
+#         }
+#         return render(request, 'accounts/login.html', context=context)
+#     else:
+#         return redirect('community:index')
+
