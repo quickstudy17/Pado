@@ -5,6 +5,7 @@ from django.contrib.auth.forms import AuthenticationForm
 
 from .forms import CustomUserCreationForm
 from community.models import Article
+from django.http import JsonResponse
 
 # Create your views here.
 @require_http_methods(['GET', 'POST'])
@@ -64,14 +65,14 @@ def profile(request, username):
     
 
 
-def follow(request, username):
-    following = request.user
-    follower = get_object_or_404(get_user_model(), username=username)
-    if following.followers.filter(pk=follower.pk).exists():
-        following.followers.remove(follower)
-    else:
-        following.followers.add(follower)
-    return redirect('accounts:profile', follower.username)
+# def follow(request, username):
+#     following = request.user
+#     follower = get_object_or_404(get_user_model(), username=username)
+#     if following.followers.filter(pk=follower.pk).exists():
+#         following.followers.remove(follower)
+#     else:
+#         following.followers.add(follower)
+#     return redirect('accounts:profile', follower.username)
 
 
 # def updateimg(request):
@@ -92,3 +93,26 @@ def follow(request, username):
 #     else:
 #         return redirect('community:index')
 
+@require_POST
+def follow(request, user_pk):
+    if request.user.is_authenticated:
+        me = request.user   #user
+        you = get_object_or_404(get_user_model(), pk=user_pk) # person
+
+        if me != you:
+            if you.followers.filter(pk=me.pk).exists():
+
+            # 언팔로우
+                you.followers.remove(me)
+                followed = False
+            else:
+            # 팔로우
+                you.followers.add(me)
+                followed = True
+
+            context = {
+                'followed' : followed,
+                'following_count' : you.followings.count(),
+                'follower_count' : you.followers.count(),
+            }
+            return JsonResponse(context)

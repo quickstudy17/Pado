@@ -28,8 +28,7 @@
   <h5>Followers: {{ profile.followers.count }}</h5>
   <h5>Followings: {{ profile.followings.count }}</h5>
   <hr>
-  <h5>게시글</h5>
-  {% if request.user.is_authenticated and request.user != profile %}
+  {% comment %} {% if request.user.is_authenticated and request.user != profile %}
   <form action="{% url 'accounts:follow' profile.username %}" method="POST">
     {% csrf_token %}
     {% if is_following %}
@@ -38,7 +37,29 @@
       <button>FOLLOW</button>
     {% endif %}
   </form>
-  {% endif %}
+  {% endif %} {% endcomment %}
+  {% with followings=person.followings.all followers=person.followers.all %}
+    <div>
+      <div>
+      팔로잉 수 : <span id="followings-cnt"> {{ followings|length }} </span> 
+      / 팔로워 수 : <span id="followers-cnt"> {{ followers|length }} </span> 
+      </div>
+    </div>
+    {% if user != person %}
+      <div>
+        <form id="follow-form" data-user-id="{{ person.pk }}" method="POST">
+          {% csrf_token %}
+          {% if user in followers %}
+            <input type="submit" id="follow-btn" value="언팔로우">
+          {% else %}
+            <input type="submit" id="follow-btn" value="팔로우">
+          {% endif %}
+        </form>
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <h5>게시글</h5>
 
   {% for article in articles %}
     {% if article.image %}
@@ -51,3 +72,16 @@
 </div>
 
 {% endblock content %}
+
+{% block script %}
+<script>
+  const followForm = document.querySelector('#follow-form')
+  followForm.addEventListener('submit', (e)=>{
+    e.preventDefault()
+    // console.log('확인!!!')
+    //const userId = e.target.dataset.userId
+    const userId = e.target.dataset
+    console.log(userId)
+  })
+</script>
+{% endblock script %}
