@@ -1,5 +1,6 @@
 import random
 import os.path
+import json
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_safe, require_POST, require_http_methods
@@ -118,13 +119,22 @@ def article_like(request, article_pk):
 
 def comment_create(request, article_pk):
     article = get_object_or_404(Article, pk=article_pk)
-    form = CommentForm(request.POST)
+    form = CommentForm(json.loads(request.body.decode('utf-8')))
     if form.is_valid():
         comment = form.save(commit=False)
         comment.article = article
         comment.user = request.user
         comment.save()
-    return redirect(request.META.get('HTTP_REFERER'))
+        context = {
+            'articleId': article_pk,
+            'comment': comment.content,
+            'author': comment.user.username,
+        }
+    else:
+        context = {
+            'message': 'error'
+        }
+    return JsonResponse(context)
 
 
 @login_required
