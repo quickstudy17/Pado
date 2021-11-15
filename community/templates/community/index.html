@@ -108,13 +108,13 @@
         </ul>
       </div>
       <hr>
-      <form class="d-flex flex-row justify-content-between mb-3 mx-2"action="{% url 'community:comment_create' article.pk %}" method="POST">
+      <form id="comment-form"class="d-flex flex-row justify-content-between mb-3 mx-2">
         {% csrf_token %}
         <div class='h-50'>
           {{ form.content }}
         </div> 
         <div>
-          <button class="btn btn-link text-primary text-decoration-none">
+          <button data-articleId="{{ article.pk }}" id="comment-btn" class="btn btn-link text-primary text-decoration-none">
             게시
           </button>
         </div>
@@ -208,6 +208,41 @@
         })
     })
   })
+  const commentForm = document.querySelector('#comment-form')
+  const commentBtn = document.querySelector('#comment-btn')
+  const commentInput = document.querySelector('#id_content')
+  
+  commentBtn.addEventListener('click', (e)=> {
+    clickCommentBtn(e)
+
+  })
+  commentInput.addEventListener('keyup', (e) => {
+    if (e.keyCode !== 13) {
+      return;
+    } else {
+    
+    }
+  })
+  const clickCommentBtn = (e) => {
+    e.preventDefault()
+    if (commentInput.value.length == 0) {
+      return;
+    }
+
+    const content = commentInput.value
+    const articleId = e.target.dataset.articleid
+    const requestUrl = `/community/${articleId}/comments/create/`
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value
+
+    axios.post(requestUrl, { content: content }, {headers: {'X-CSRFToken': csrfToken}})
+      .then((res) => {
+        const comment = document.createElement('li')
+      })
+      .catch((err)=> {
+          window.alert(err)
+        })
+  }
+      
 
 </script>
 {% endblock script %}
