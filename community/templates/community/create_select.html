@@ -1,13 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<form action="" method="POST" enctype="multipart/form-data">
-  {% csrf_token %}
-  <input type="file" name="image" id="image" multiple>
-  <br>
-  {{ form.content }}
-  {% comment %} {{ form.as_p }} {% endcomment %}
-  {% comment %} <input type="submit" name="upload" value="Upload"> {% endcomment %}
-  <button>Go</button>
+<form id="post_form" method="POST" action="" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in ArticleForm %}
+        {{ field }} <br />
+    {% endfor %}
+
+    {{ formset.management_form }}
+    {% for form in formset %}
+        {{ form }}
+    {% endfor %}
+
+    <input type="submit" name="submit" value="Submit" />
 </form>
 {% endblock content %}

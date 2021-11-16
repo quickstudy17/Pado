@@ -5,11 +5,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_safe, require_POST, require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.http import JsonResponse
-
-from .models import Article, Comment
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
+from .models import Article, Comment, Article_Images
 from accounts.models import User
-from .forms import ArticleForm, CommentForm
+from .forms import ArticleForm, CommentForm, ImageForm, PrivateArticleForm
+from django.contrib.auth.models import Group
+from django.forms import modelformset_factory
 
 from PIL import Image
 
@@ -31,18 +32,42 @@ def index(request):
 @require_http_methods(['GET', 'POST'])
 def create_select(request):
     if request.method == 'POST':
-        form = ArticleForm(request.POST, request.FILES)
-        if form.is_valid():
+        form = ArticleForm(request.POST)
+        if form.is_valid() :
             article = form.save(commit=False)
             article.user = request.user
             article.save()
-            return redirect('community:index')
+            image_list = request.FILES.getlist('image')
+            for image in image_list:
+                image = Image.objects.create(image=image, article_id=article.pk)
+            return HttpResponseRedirect("/")
     else:
         form = ArticleForm()
     context = {
         'form': form,
+ 
     }
     return render(request, 'community/create_select.html', context)
+
+# @login_required
+# @require_http_methods(['GET', 'POST'])
+# def create_private_article(request):
+#     if request.method == 'POST':
+#         form = PrivateArticleForm(request.POST)
+#         if form.is_valid():
+#             private_article = form.save(commit=False)
+#             private_article.user = request.user
+#             user = request.user
+#             private_article.save()
+#             new_group = Group.objects.create(name= private_article.pk)
+#             user.groups.add(new_group)
+#             return redirect('community:index_private', private_article.pk)
+#     else:
+#         private_article_form = PrivateArticleForm()
+#     context = {
+#         'private_article_form' : private_article_form,
+#     }
+#     return redirect('comunity:index')
 
 
 def create_detail(request):
